@@ -1,0 +1,125 @@
+Sub ticker_summary()
+
+    ' Test run to gather first open & last close values on a yearly basis for a given ticker / stock
+    ' and total volume of trades for the year
+    
+    'Loop through each worksheet
+    
+    
+   For Each ws In Worksheets
+ 
+    ' Define variables
+    
+       Dim ticker As String
+       Dim val_open As Double
+       Dim val_close As Double
+       Dim volume As Double
+       Dim sum_vol As Double
+       Dim column As Integer
+       Dim summ_row As Integer
+       Dim ts_start_row As Long
+       
+       
+       ' Insert column headers
+       ' NB: any cell refernces must be prefixed with ws
+       
+       ws.Range("I1").Value = "Ticker"
+       ws.Range("J1").Value = "Yearly Change"
+       ws.Range("K1").Value = "Percent Change"
+       ws.Range("L1").Value = "Volume"
+       
+       
+       column = 1
+       
+       ' Summ row defines the number of the summary table row
+       
+       summ_row = 2
+       
+       ' Ticker start row initially is row 2 then changes with change in ticker. This is used to hold the value of the opening price
+       
+       
+       ts_start_row = 2
+       
+       ' Initialize calculation variables
+       
+       
+       ' The first open value will be held until a change in ticker name
+       ' The close value will be updated until a change in ticker name occurs.
+       
+       ' ID the last row
+       
+       last_row = ws.Cells(Rows.Count, 1).End(xlUp).Row
+       
+       For i = 2 To last_row
+       
+           ticker = ws.Cells(i, 1).Value
+           val_open = ws.Cells(ts_start_row, 3).Value
+           val_close = ws.Cells(i, 6).Value
+           volume = ws.Cells(i, 7).Value
+           sum_vol = sum_vol + volume
+    
+       '    MsgBox ("Open: " & val_open)
+       '    MsgBox ("Close: " & val_close)
+       '    MsgBox ("Volume: " & volume)
+       '    MsgBox ("Sum of Volume: " & sum_vol)
+           
+       
+       ' Check to see if the ticker value is changing on the next row. If it does then update the
+       ' summary table. Insert the values for the current ticker, yearly change, yearly percentage change
+       ' and total volume traded. Update the ticker start row to the next row in the table.
+       
+       
+        If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        
+        
+           ws.Cells(summ_row, 9).Value = ticker
+           ws.Cells(summ_row, 10).Value = val_close - val_open
+           ws.Cells(summ_row, 12).Value = sum_vol
+           
+           
+           ' There are sum null / zeroed data values these need to disregarded
+                
+                
+               If val_open <> 0 Then
+               
+                ws.Cells(summ_row, 11).Value = ((val_close - val_open) / val_open)
+                ws.Cells(summ_row, 11).NumberFormat = "0.00%"
+                
+                Else
+                
+                 ws.Cells(summ_row, 11).Value = "Data is zero"
+                'otherwise do not calc so as not to invoke a div by zero crash
+                
+               End If
+           
+             
+           
+                If ws.Cells(summ_row, 10).Value <= 0 Then
+                   ws.Cells(summ_row, 10).Interior.ColorIndex = 3
+                 Else
+                   ws.Cells(summ_row, 10).Interior.ColorIndex = 4
+                End If
+                
+           ' Reset variables
+           
+           ts_start_row = i + 1
+           sum_vol = 0
+           val_open = 0
+           val_close = 0
+           summ_row = summ_row + 1
+           
+          ' Else
+           
+         '  val_close = Cells(i, 6).Value
+           
+           
+        End If
+        
+         
+       Next i
+    
+ Next ws
+ 
+    
+End Sub
+
